@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,279 +13,246 @@ namespace Lab5
 {
     public partial class Form1 : Form
     {
+      /*
+      Jon McNamee
+      Lab 5: Functions and Loops
+      Due Date: 6 December 2022
+      */
         public Form1()
         {
             InitializeComponent();
-        }
-       /* Name: Jonah Martin
-        * Date: December 6, 2022
-        * Description: This form performs 3 main tasks. Firstly it generates
-        * a randomized login code for the user to input so they can access the rest of the form.
-        * Then there is a string-swapping groupbox where the user inputs 2 strings and the program
-        * swaps them. And finally there is a stats groupbox where the user inputs a number and
-        * the program runs some calculations for sum, mean, and the amount of odd numbers */
-
-        /* Name: GetRandom
-         * Description: generates random number between a min & max values (no seed)
-         * In: 2 ints (min, max)
-         * Out: int */
-        private int GetRandom(int MIN, int MAX)
-        {
-            Random randNum = new Random();
-            return randNum.Next(MIN, MAX + 1);
+            /*sets name of form to include my name, hides groupboxes below login area, generates random number between 100k and 200k 
+             places cursor on login code
+             */
+            this.Text += " " + PROGRAMMER;
+            grpChoose.Hide();
+            grpStats.Hide();
+            grpText.Hide();
+            txtCode.Focus();
+            lblCode.Text=Convert.ToString(GetRandom(100000,200000));
         }
 
-        /* This event will run on form load, and it sets the PROGRAMMER constant
-         * to display in the form title, hides the choose, stats, and text groupboxes,
-         * and generates a random number that the user will use in the following event. */
-        const string PROGAMER = "Jonah Martin";
-        private void Form1_Load(object sender, EventArgs e)
-        {
-             this.Text += " " + PROGRAMMER;
+        //creates constant for my name to be used where needed
+        const string PROGRAMMER = "Jon McNamee";
 
-             grpChoose.Hide();
-             grpStats.Hide();
-             grpText.Hide();
-             txtCode.Focus();
-             const int MIN = 100000;
-             const int MAX = 200000;
+        //sets counter to 0 for the ensuing login count
+        int count = 0;
 
-             int num = GetRandom(MIN, MAX + 1);
-             lblCode.Text = num.ToString();
+        private int GetRandom(int min, int max) 
+        { 
+         // function to create random number generator
+            Random rand = new Random();
+            return rand.Next(min, max);
         }
 
-        /* Checks if the number entered is equal to the randomly generated code.
-         * Also will track how many times the button has been clicked so that after the maximum
-         * amount of attempts has been reached, the program will shut off. Otherwise if the input
-         * matches the randomly generated code, the choose group box will be shown.*/
-        int attemptCount = 0;
-        private void btnLogin_Click(object sender, EventArgs e)
-        {
-            attemptCount++;
-            const int ATTEMPTS = 3;
-            if (Convert.ToInt32(lblCode.Text) != Convert.ToInt32(txtCode.Text))
-            {
 
-                if (attemptCount == 1)
-                {
-                    MessageBox.Show("3 attempts to login\nAccount locked - closing program", PROGRAMMER);
-                    this.Close();
-                }
-                else
-                {
-                    MessageBox.Show(attemptCount + " incorrect code(s) entered\nTry again - only " + ATTEMPTS + " attempts allowed", PROGRAMMER);
-                    txtCode.Focus();
-                }
-            }
-            else
-            {
-                grpChoose.Show();
-                grpLogin.Enabled = false;
-            }
-        }
-        /* Name: ResetTextGrp
-         * Description: Resets all controls within the text groupbox to default values.
-         * Also changes the accept/cancel buttons of the form to be associated with the text groupbox.
-         * In: nothing
-         * Out: void */
+        //resets text groupbox and values, and places cursor in top textbox
         private void ResetTextGrp()
         {
             txtString1.Text = "";
-            txtString1.Focus();
             txtString2.Text = "";
             chkSwap.Checked = false;
             lblResults.Text = "";
-            this.AcceptButton = btnJoin;
-            this.CancelButton = btnReset;
+            txtString1.Focus();
         }
-        /* Name: ResetStatsGrp
-         * Description: Resets all controls within the stats groupbox to default values.
-         * Also changes the accept/cancel buttons of the form to be associated with the stats groupbox.
-         * In: nothing
-         * Out: void */
+
+        //resets stat groupbox and values
         private void ResetStatsGrp()
         {
-            nudNumber.Value = 10;
+            numStats.Value = 10;
             lblSum.Text = "";
             lblMean.Text = "";
             lblOdd.Text = "";
             lstNumbers.Items.Clear();
-            this.AcceptButton = btnGenerate;
-            this.CancelButton = btnClear;
         }
-        /* Name: SetupOption
-         * Description: displays/hides the text and stats groupboxes based on which radio button has been checked.
-         * In: nothnig
-         * Out: void */
-        private void SetupOption()
+        private void btnLogin_Click(object sender, EventArgs e)
         {
-            switch (radText.Checked)
-            {
-                case true:
-                        ResetTextGrp();
-                        grpText.Show();
-                        txtString1.Focus();
-                        grpStats.Hide();
-                        break;
-                    
+            /*
+             Checks that the input in the textbox matches random code in label, if it does login is successful and grants access to rest of program.
+            If input does not match code, increments counter and displays msg with attempts shown. Closes program after 3 unsuccessful attempts. */
 
-                case false:
-                        ResetStatsGrp();
-                        grpStats.Show();
-                        grpText.Hide();
-                        break;
+            if (txtCode.Text == lblCode.Text) 
+            {
+                grpLogin.Enabled=false;
+                grpChoose.Show();
+
+            }
+            else
+            {
+                count++;
+
+                MessageBox.Show(Convert.ToString(count) + " incorrect code(s) entered.\nTry again - only 3 attempts allowed", PROGRAMMER);
+               
+                if(count == 3)
+                {
+                    MessageBox.Show("3 attempts to log in\nAccount locked - closing program", PROGRAMMER);
+                    this.Close();
+                }
             }
         }
-        // runs the SetupOption function when Text radio button has been checked
+        //loads the appropriate grpboxes based on which radio button is checked by user
+        private void SetupOption()
+        {
+            if (radText.Checked)
+            {
+                grpText.Show();
+                ResetStatsGrp();
+                grpStats.Hide();
+                this.AcceptButton = btnJoin;
+                this.CancelButton = btnReset;
+            }
+            else if(radStats.Checked)
+            { 
+                grpStats.Show();
+                ResetTextGrp();
+                grpText.Hide();
+                this.AcceptButton = btnGenerate;
+                this.CancelButton = btnClear;
+            }
+
+        }
+
         private void radText_CheckedChanged(object sender, EventArgs e)
         {
             SetupOption();
         }
-        // runs the SetupOption function when Stats radio button has been checked
+
         private void radStats_CheckedChanged(object sender, EventArgs e)
         {
             SetupOption();
+
         }
-        // runs the ResetTextGrp funtion when the Reset button is clicked
+
         private void btnReset_Click(object sender, EventArgs e)
         {
             ResetTextGrp();
         }
-        // runs the ResetTextGrp funtion when the Clear button is clicked
+
         private void btnClear_Click(object sender, EventArgs e)
         {
             ResetStatsGrp();
         }
-
-        /* Name: Swap
-         * Description: swaps the location of the inputed strings in RAM memory
-         * In: 2 strings (string1, string2)
-         * Out: void */
-        private void Swap(ref string string1, ref string string2)
+        //swaps values inputted into txtstring1 and 2, and redisplays label with new values
+        private void Swap(ref string stringFirst, ref string stringSecond)
         {
-            string temp = txtString1.Text;
-            string1 = txtString2.Text;
-            string2 = temp;
+            stringFirst = txtString1.Text;
+            stringSecond = txtString2.Text;
+
+            string storage = txtString1.Text;
+            stringFirst = txtString2.Text;
+            stringSecond = storage;
+
+            txtString1.Text = stringFirst;
+            txtString2.Text = stringSecond;
         }
-        /* Name: CheckInput
-         * Description: checks whether data has been entered into textboxes
-         * In: Nothing
-         * Out: Boolean */
+
+        //function to check that there is text input in both textboxes. Returns false if either box has no input
         private bool CheckInput()
         {
-            bool input;
-            if (txtString1.Text != "" && txtString2.Text != "")
+            bool isValid;
+            if(txtString1.Text == "" || txtString2.Text == "")
             {
-                input = true;
+                isValid = false;
             }
-            else
+            else 
             {
-                input = false;
+                isValid = true; 
             }
-
-            return input;
+            return isValid;
         }
-        /* runs CheckInput function to see if textboxes have data. If they do
-         * it runs the Swap function to swap the 2 strings and displays a
-         * message in the results label. All of this is done upon checking
-         * the swap checkbox*/
+
         private void chkSwap_CheckedChanged(object sender, EventArgs e)
         {
-            bool input = CheckInput();
-            if (input)
+            bool check = CheckInput();
+            if(check==true) 
             {
-                string string1 = txtString1.Text;
-                string string2 = txtString2.Text;
-                Swap(ref string1, ref string2);
-                txtString1.Text = string1;
-                txtString2.Text = string2;
-                lblResults.Text = "Strings have been swapped!";
+                string stringFirst = txtString1.Text;
+                string stringSecond = txtString2.Text;
+
+                Swap(ref stringFirst, ref stringSecond);
+                lblResults.Text = "strings have been Swapped!";
             }
         }
-        // joins the 2 strings in the results label if there is data upon activating the Join button
+
+        //checks that there has been input into both textboxes, then displays results in label displaying values
         private void btnJoin_Click(object sender, EventArgs e)
         {
-            bool input = CheckInput();
-            if (input)
+            string stringFirst = txtString1.Text;
+            string stringSecond = txtString2.Text;
+
+            bool check = CheckInput();
+            if(check == true)
             {
-                lblResults.Text = "First string = " + txtString1.Text + "\nSecond String = " + txtString2.Text + "\nJoined = " + txtString1.Text + "-->" + txtString2.Text;
+                lblResults.Text = "First String = "+stringFirst+"\nSecond String = "+stringSecond+"\nJoined = "+stringFirst+"-->"+stringSecond;
             }
         }
-        // if there is input, analyzes the 2 strings and displays how many characters are in each
+
         private void btnAnalyze_Click(object sender, EventArgs e)
         {
-            bool input = CheckInput();
-            if (input)
+            string stringFirst = txtString1.Text;
+            string stringSecond = txtString2.Text;
+
+            bool check = CheckInput();
+            if(check == true)
             {
-                lblResults.Text = "First string = " + txtString1.Text + "\n Characters = " + txtString1.TextLength + "\nSecond string = " + txtString2.Text + "\n Characters = " + txtString2.TextLength;
+                lblResults.Text = "First String = " + stringFirst + "\nCharacters = "+stringFirst.Length+"\nSecond String = " + stringSecond + "\nCharacters = "+ stringSecond.Length;
             }
         }
-        /* Generates new random numbers (with a seed & between a min/max value) and 
-         * displays them in the listbox. The amount of numbers in the list is
-         * equal to the number in the numeric updown control. Then it calculates
-         * the sum, the mean, and the amount of odd numbers in the list and displays
-         * them in their respective labels */
-        private void btnGenerate_Click(object sender, EventArgs e)
-        {
-            lstNumbers.Items.Clear();
-            const int MAX = 5000;
-            const int MIN = 1000
 
-            // generates random number 
-            Random rand = new Random(733);
-
-            // adds the random numbers to the listbox
-            for (int i = 0; i < nudNumber.Value; i++)
-            {
-                lstNumbers.Items.Add(rand.Next(MIN, MAX + 1));
-            }
-            // calls AddList function which sums up the numbers in listbox 
-            int sum = AddList();
-            // displays sum in respective label //
-            lblSum.Text = sum.ToString("#,###");
-            // calculates and displays mean in respective label
-            lblMean.Text = (sum / nudNumber.Value).ToString("#,###.#0");
-            //calls oddNumbers function to calculate how many odd #s there are and display them
-            int oddNumbers = CountOdd();
-            lblOdd.Text = oddNumbers.ToString();
-        }
-
-        /* Name: AddList
-         * Description: sums up the numbers in the listbox and returns the value
-         * In: Nothing
-         * Out: int */
+        //performs a while loop to add up sum of listbox content, returns value for use in form
         private int AddList()
         {
-            int i = 0;
-            int sum = 0;
-            
-            while (i < lstNumbers.Items.Count)
-            {
-                sum += Convert.ToInt32(lstNumbers.Items[i]);
-                i++;
+            count = 0;
+            int Sum = 0;
+
+            while (lstNumbers.Items.Count>count)
+            { 
+                Sum += Convert.ToInt32(lstNumbers.Items[count++]);
             }
-            return sum;
+
+            return Sum;
         }
-        /* Name: CountOdd
-         * Description: calculates the number of odd numbers in the listbox and returns the value
-         * In: Nothing
-         * Out: int */
+
+        //counts the number of odd numbers and returns the value for use in form
         private int CountOdd()
         {
-            int oddNumbers = 0;
+            int count = 0;
+            int odd = 0;
+            
             do
             {
-                if (Convert.ToInt32(lstNumbers.Items[i]) % 2 == 1)
+                if (Convert.ToInt32(lstNumbers.Items[count]) % 2 != 0)
                 {
-                    oddNumbers++;
+                    odd++;
                 }
+                count++;
+            } while (count<lstNumbers.Items.Count);
+            return odd;
+        }
+        private void btnGenerate_Click(object sender, EventArgs e)
+        {
+            
+            lstNumbers.Items.Clear();
+            int value = Convert.ToInt32(numStats.Value);
 
-                i++;
+            Random rand = new Random(733); //seed value 733
+
+            for(int count = 0;  count<value; count ++)
+            {
+                lstNumbers.Items.Add(rand.Next(1000,5001));
             }
-            while (i < lstNumbers.Items.Count);
-            return oddNumbers;
+            double Sum = AddList();
+
+            lblSum.Text = Sum.ToString("N0");
+
+            double avg;
+
+            avg = Sum / lstNumbers.Items.Count;
+
+            lblMean.Text = avg.ToString("N");
+
+            int odd=CountOdd();
+            lblOdd.Text=odd.ToString();
         }
     }
-
 }
-
